@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        Required by CompanionDeviceManager.associate() per Android's
+        feature gate. Without it, associate() throws
+        IllegalStateException even when the REQUEST_COMPANION_*
+        permissions are declared. required="true" — without the CDM
+        association the watch can't start a run while the app is closed.
+    -->
+    <uses-feature
+        android:name="android.software.companion_device_setup"
+        android:required="true" />
+
+    <!--
+        Permissions.
+
+        BLUETOOTH_CONNECT is required by PebbleKitAndroid2 on Android 12+.
+        BLUETOOTH_SCAN is deliberately NOT requested — our CDM pairing
+        uses the bonded-device fast path (classic BluetoothDeviceFilter
+        with the watch's MAC + setSingleDevice(true), see CdmManager.kt),
+        which short-circuits straight to BluetoothAdapter.getBondedDevices()
+        with no scan.
+
+        Deliberately NOT requested: BLUETOOTH_SCAN, storage, and
+        QUERY_ALL_PACKAGES.
+    -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- Map tiles are downloaded (and cached) by MapSession / TileStore. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+        GPS for the watch's map while the watchapp is open, and to record runs.
+        The phone is usually locked then, so background location is needed.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!--
+        Foreground-service support for run state.
+        PebbleListenerService promotes itself to a foreground service
+        while a run is recording so the OS doesn't reap us mid-run.
+
+        FOREGROUND_SERVICE_CONNECTED_DEVICE is required on API 34+ to
+        match the service's android:foregroundServiceType="connectedDevice"
+        declaration.
+
+        POST_NOTIFICATIONS is deliberately NOT requested. Android
+        requires a Notification object on every startForeground call but
+        the permission only controls *visibility* — on API 33+ the FGS
+        notification is hidden by default without the permission, which
+        is what we want here: the watch shows the run. Users who want our
+        tap-to-open-Home affordance can enable the Recording channel via
+        system notification settings.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
+        android:minSdkVersion="34" />
+
+    <!--
+        CompanionDeviceManager background exemptions. Both are
+        normal-level: declaring them is necessary, but the actual grant
+        only takes effect once the user completes the CDM pairing dialog.
+        With an active association the listener service may go foreground
+        from the background, when the watch starts a run.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
+
+    <!--
+        Package visibility on Android 11+ (API 30+) requires explicit declarations
+        for any package we resolve or any Intent action we send.
+    -->
+    <queries>
+        <!--
+            PebbleKitAndroid2 picker: on Android 11+ the library
+            enumerates components handling this action to find the Pebble
+            companion app (`coredevices.coreapp`, min v1.0.7.7).
+        -->
+        <intent>
+            <action android:name="io.rebble.pebblekit2.RECEIVE_DATA_FROM_WATCH" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.GetAfterIt">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- "Open with" / share a GPX file to load it as the course. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/gpx+xml" />
+            </intent-filter>
+        </activity>
+
+        <!-- Shares saved runs' GPX files with other apps. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!--
+            PebbleKitAndroid2 bound service.
+
+            The Pebble companion app on the phone (`coredevices.coreapp` ≥ 1.0.7.7)
+            binds to this service when our watchapp opens. Service self-terminates
+            a few seconds after the last watchapp closes (per library docs).
+
+            android:exported="true" with an intent-filter is required for the
+            Pebble companion app to resolve us; `tools:ignore="ExportedService"`
+            suppresses the lint warning since the access control is enforced by
+            the library's [PebbleAndroidAppPicker] (per-package allowlist).
+        -->
+        <service
+            android:name=".pebble.PebbleListenerService"
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="io.rebble.pebblekit2.RECEIVE_DATA_FROM_WATCH" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>

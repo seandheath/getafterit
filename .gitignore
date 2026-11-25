@@ -1,0 +1,9 @@
+build/
+.venv/
+node_modules/
+.lock-waf*
+companion/.gradle/
+companion/build/
+companion/app/build/
+companion/local.properties
+companion/.kotlin/

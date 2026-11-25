@@ -1,0 +1,32 @@
+{
+  "name": "get-after-it",
+  "author": "Sean Heath",
+  "version": "0.1.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Get After It",
+    "uuid": "622e9f96-77f2-4786-aa7d-389cf4852561",
+    "sdkVersion": "3",
+    "targetPlatforms": ["emery"],
+    "capabilities": ["health"],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [],
+    "companionApp": {
+      "android": {
+        "apps": [
+          { "package": "org.luckyobserver.getafterit" },
+          { "package": "org.luckyobserver.getafterit.debug" }
+        ]
+      }
+    },
+    "resources": {
+      "media": [
+        { "type": "bitmap", "name": "IMAGE_MENU_ICON", "file": "images/menu_icon.png", "menuIcon": true }
+      ]
+    }
+  }
+}

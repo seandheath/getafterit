@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Get After It</string>
+
+    <!-- Foreground-service notification -->
+    <string name="notification_channel_recording_name">Recording</string>
+    <string name="notification_channel_recording_description">Shown while Get After It is recording.</string>
+    <string name="notification_recording_title">Get After It</string>
+    <string name="notification_recording_text">Recording — see your watch</string>
+</resources>

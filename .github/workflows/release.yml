@@ -1,0 +1,39 @@
+# Builds the watchapp and phone app for each release tag and attaches them to a
+# GitHub Release. Only runs on GitHub; the Gitea development repo skips it.
+name: Release
+on:
+  push:
+    tags: ["*"]
+permissions:
+  contents: write
+jobs:
+  release:
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The Pebble SDK runs in a bubblewrap FHS sandbox, which Ubuntu's
+      # AppArmor blocks by default.
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - uses: cachix/install-nix-action@v31
+      - run: make test build
+      # Signed with the release key from the repository's secrets, so each
+      # release installs over the previous one.
+      - name: Build the phone app
+        env:
+          RELEASE_KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_B64 }}
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: ${{ github.ref_name }}
+        run: |
+          export RELEASE_KEYSTORE="$RUNNER_TEMP/release.jks"
+          echo "$RELEASE_KEYSTORE_B64" | base64 -d > "$RELEASE_KEYSTORE"
+          make companion-release
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build/*.pbw "get-after-it-$GITHUB_REF_NAME.pbw"
+          cp companion/app/build/outputs/apk/release/app-release.apk "get-after-it-$GITHUB_REF_NAME.apk"
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes \
+            "get-after-it-$GITHUB_REF_NAME.pbw" "get-after-it-$GITHUB_REF_NAME.apk"

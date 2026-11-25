@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launcher icon as one drawable for use inside the app. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00AAFF"
+        android:pathData="M24,0 H84 A24,24 0,0 1 108,24 V84 A24,24 0,0 1 84,108 H24 A24,24 0,0 1 0,84 V24 A24,24 0,0 1 24,0 Z" />
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="1.3" android:scaleY="1.3">
+        <!-- Horns -->
+        <path
+            android:pathData="M46,40 Q39,25 29,32 M62,40 Q69,25 79,32"
+            android:strokeColor="#000055"
+            android:strokeWidth="7"
+            android:strokeLineCap="round" />
+        <!-- Ears -->
+        <group android:pivotX="37" android:pivotY="50" android:rotation="-20">
+            <path android:fillColor="#FFFFFF" android:pathData="M30,50 a7,3.5 0 1,0 14,0 a7,3.5 0 1,0 -14,0" />
+        </group>
+        <group android:pivotX="71" android:pivotY="50" android:rotation="20">
+            <path android:fillColor="#FFFFFF" android:pathData="M64,50 a7,3.5 0 1,0 14,0 a7,3.5 0 1,0 -14,0" />
+        </group>
+        <!-- Head and beard -->
+        <path android:fillColor="#FFFFFF" android:pathData="M41,40 Q54,33 67,40 L63,73 Q54,82 45,73 Z" />
+        <path android:fillColor="#FFFFFF" android:pathData="M50,79 L54,89 L58,79 Z" />
+        <!-- Mismatched eyes, for the wild look -->
+        <path android:fillColor="#000000" android:pathData="M43,52 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+        <path android:fillColor="#000000" android:pathData="M57.4,52 a3.6,3.6 0 1,0 7.2,0 a3.6,3.6 0 1,0 -7.2,0" />
+        <path android:fillColor="#FFFFFF" android:pathData="M47.9,50.5 a1.6,1.6 0 1,0 3.2,0 a1.6,1.6 0 1,0 -3.2,0" />
+        <path android:fillColor="#FFFFFF" android:pathData="M60.9,51 a1.1,1.1 0 1,0 2.2,0 a1.1,1.1 0 1,0 -2.2,0" />
+        <!-- Tongue and mouth -->
+        <path android:fillColor="#FF55AA" android:pathData="M51.4,77 a3.6,4.4 0 1,0 7.2,0 a3.6,4.4 0 1,0 -7.2,0" />
+        <path
+            android:pathData="M50,73 L60,73"
+            android:strokeColor="#000000"
+            android:strokeWidth="2.5"
+            android:strokeLineCap="round" />
+    </group>
+</vector>
